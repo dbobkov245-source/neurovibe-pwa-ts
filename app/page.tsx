@@ -1,3 +1,4 @@
+// app/page.tsx
 "use client";
 
 import { useState, useRef, useEffect, FC, FormEvent } from "react";
@@ -15,7 +16,10 @@ interface ChatMessageProps {
 
 const ChatMessageComponent: FC<ChatMessageProps> = ({ message }) => {
   const isAi = message.role === "model";
-  const textContent = Array.isArray(message.parts) ? message.parts[0].text : '';
+  
+  // --- ИСПРАВЛЕНО ЗДЕСЬ ---
+  // Безопасно извлекаем текст, чтобы избежать ошибки с 'undefined'
+  const textContent = message.parts?.[0]?.text ?? '';
 
   return (
     <div className={`flex ${isAi ? "justify-start" : "justify-end"} mb-4`}>
@@ -81,9 +85,16 @@ export default function HomePage() {
       ? [...chatHistory] 
       : [...chatHistory, newUserMessage];
 
+    // В Vercel может быть ошибка 'Content part is not a string'
+    // Убедимся, что все parts - это объекты { text: "..." }
+    const historyForApi = newChatHistory.map(msg => ({
+      role: msg.role,
+      parts: msg.parts.map(part => (typeof part === 'string' ? { text: part } : part))
+    })) as Content[];
+
     setChatHistory(newChatHistory);
     
-    const responseText = await getGameResponse(newChatHistory, userPrompt);
+    const responseText = await getGameResponse(historyForApi, userPrompt);
     
     const aiMessage: ChatMessage = {
       role: "model",
