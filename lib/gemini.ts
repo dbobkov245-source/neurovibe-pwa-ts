@@ -1,17 +1,19 @@
+// lib/gemini.ts
 import { GoogleGenerativeAI, Content } from "@google/generative-ai";
 
 const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
 if (!apiKey) {
-  // Эта ошибка остановит сборку, если ключ не установлен на Vercel
   throw new Error("NEXT_PUBLIC_GEMINI_API_KEY is not defined");
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
 
 const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash",
-  // Теперь эта строка работает благодаря обновлению SDK
+  // --- ИЗМЕНЕНО ЗДЕСЬ ---
+  // Переключаемся на стабильную и глобально доступную модель
+  model: "gemini-1.0-pro", 
+  
   systemInstruction: `Ты — NeuroVibe, дерзкий игровой движок. Твоя цель — тренировать память и давать XP.
 Режимы:
 1. СЛОВА: Сгенерируй 7 слов. Жди 'Готов'. Проверь список. +10 XP за слово.
